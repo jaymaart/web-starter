@@ -178,7 +178,10 @@ The non-negotiable baseline for anything internet-facing.
   Plus HSTS, `X-Frame-Options`, `Referrer-Policy`, COOP.
 - **Auth model:** stateless JWT sessions. Magic links for end users (short expiry,
   **one-time-use enforced via a Redis JTI dedup** to kill replay), credentials/SSO for
-  staff. Role-based gates (`customer` / `staff` / `admin`) enforced in middleware.
+  staff. Role-based gates (`customer` / `staff` / `admin`) enforced at the request edge.
+  On **Next.js 16+ this is the `proxy.ts` convention** (`middleware.ts` is deprecated);
+  with Auth.js v5, export the edge handler as `export default auth` — a destructured
+  `export const { auth: proxy }` is not recognized as a function export.
 - **CORS/CSRF:** mutation endpoints check an **origin allowlist**; webhooks verify
   **signatures** before doing any work.
 - **File uploads:** whitelist MIME type *and* extension, cap per-file and total size, and
@@ -265,7 +268,9 @@ The non-negotiable baseline for anything internet-facing.
 ## 12. Tooling
 
 - **ESLint** (flat config) extending the framework's recommended + web-vitals rules. Lint
-  passes before merge.
+  passes before merge. On **Next.js 16**, import the flat config directly
+  (`import nextVitals from "eslint-config-next/core-web-vitals"`); the older
+  `FlatCompat` + `extends(...)` shim crashes with a circular-JSON error.
 - **`@/*` path alias** configured in `tsconfig`.
 - **MCP servers / CLI tooling in `tools/`**, declared in `.mcp.json` when used with Claude Code.
 - Keep `package.json` scripts boring and standard: `dev`, `build`, `start`, `lint`.
@@ -289,16 +294,19 @@ A change is shippable when:
 
 ---
 
-## 14. Testing (open item)
+## 14. Testing
 
-This baseline does not yet mandate an automated test suite — the reference project relies on
-typed boundaries, Zod validation, and manual QA on deploy previews. **For new client work,
-decide the testing strategy up front** and record it here per project:
-- Unit-test the pure logic in `lib/` (transformers, validators, pricing/calc).
+**Default: Vitest** for unit tests over the pure logic in `lib/`. The starter ships a
+working `vitest.config.ts` (with the `@/*` alias wired) and sample tests, so there's no
+setup friction — `npm test` works on a fresh clone. Decide the depth per project and record
+it here:
+- Unit-test the pure logic in `lib/` (transformers, validators, escaping, pricing/calc).
 - Integration-test the critical money/auth paths.
 - Smoke-test the happy path end-to-end before each release.
 
-Treat the absence of tests as a known gap to close, not a standard to keep.
+Older projects (including the original reference app) predate this and lean on typed
+boundaries, Zod validation, and manual QA on deploy previews — treat that absence as a known
+gap to close, not a standard to keep.
 
 ---
 

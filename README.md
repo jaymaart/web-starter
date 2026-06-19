@@ -18,6 +18,7 @@ email, alerts) is lazy and degrades gracefully, so you wire integrations in as y
 ```bash
 npm run build   # production build — the bar for "done" (§13)
 npm run lint    # eslint (next core-web-vitals + typescript)
+npm test        # vitest — unit tests over src/lib/
 ```
 
 ## What's wired in
@@ -36,6 +37,7 @@ npm run lint    # eslint (next core-web-vitals + typescript)
 | Tagged logging | `src/lib/logger.ts` |
 | Third-party integration shape (§4.5) | `src/lib/example-service.ts` |
 | Zod boundary + fire-and-forget pipeline | `src/app/api/contact/route.ts` |
+| Vitest unit tests (§14), `@/*` alias wired | `vitest.config.ts`, `src/lib/*.test.ts` |
 | Boot-time warm-up hook | `src/instrumentation.ts` |
 | Migrations (trigram search, JSONB, mirror) | `db/migrations/001_init.sql` |
 | CVA UI primitive | `src/components/ui/button.tsx` |
